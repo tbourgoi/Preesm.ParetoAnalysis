@@ -1,164 +1,26 @@
-% % Power = Energy./DurationII;
-% % pow = unique(Power);
-% % mem = unique(Memory);
-% % dura = unique(DurationII);
-% ParameterMetrics(:,9) = ParameterMetrics(:,9)./ParameterMetrics(:,12);
-% % Parameter = [nKeypointsMaxUser image_width parallelismLevel AspectRatioDenominator delayRead delayDisplay NumeratorFrequency imgDouble];
-% nbParam = size(Parameter,2);
-% order = nbParam:-1:1;
-% A = [zeros(nbParam-1,1) eye(nbParam-1);ones zeros(1,nbParam-1)];
-% order = order*A;
-% ParameterMetrics = sortrows(ParameterMetrics, order);
+% compute labels 
+% set the value of all parameter except one and check the evolution of each
+% metrics
+% for each metric and each parameter impacts are saved in an array of the size the number of configuration tested
+% (here 4320)
 % 
-% %%
-% %plot first memory results as a function of nKeypointsMaxUser
-% % first set constant but some aren't (after 28)
-% 
-% figure(), 
-% Leg = {};
-% a = 1:9;
-% for ids = 1:28
-%     semilogy(ParameterMetrics(a,1), ParameterMetrics(a,12)), hold on;
-%     a = a+size(a,2)*ones(size(a))
-%     Leg{ids,1} = ['Image_width = ',int2str(ParameterMetrics(a(1),2)), ' Parallelism = ',int2str(ParameterMetrics(a(1),3)), ' AspectRatio = ',int2str(ParameterMetrics(a(1),4))];
-% end
-% xlabel('nKeypointsMaxUser');
-% ylabel('Memory (log)');
-% title('Memory as a function of nKeypointsMaxUser for a given values of other parameters');
-% legend(Leg)
-% 
-% %%
-% %generalisation of previous section to check a metric as a function of a given parameter 
-% %nKeypointsMaxUser = 1 image_width = 2 parallelismLevel = 3 
-% %AspectRatioDenominator = 4 delayRead = 5 
-% %delayDisplay = 6 NumeratorFrequency = 7 imgDouble = 8
-% 
-% testParam = 5;
-% 
-% while(order(8) ~= testParam)
-%     order = order*A;
-% end
-% 
-% %Power = 9 Latency = 10 DurationII = 11 Memory = 12 Energy = 13
-% 
-% testMetric = 12;
-% 
-% ParameterMetrics = sortrows(ParameterMetrics, order);
-% nbTimesSameValue = size(find(ParameterMetrics(:,testParam)==ParameterMetrics(1,testParam)),1);
-% %compute the number of possible value for the parameter
-% a = 1:(4320/nbTimesSameValue);
-% 
-% parameterImpact = 2*ones(size(ParameterMetrics,1),1);
-% 
-% for idx = 1:nbTimesSameValue
-%     parameterImpact(a,1) = all(ParameterMetrics(a,testMetric)==ParameterMetrics(a(1),testMetric));
-%     a = a+size(a,2)*ones(size(a));
-% end
-% same = find(parameterImpact(:,1) == 1);
-% diff = find(parameterImpact(:,1) == 0);
-% 
-% same_2 = ParameterMetrics(same,:);
-% diff_2 = ParameterMetrics(diff,:);
+% check all the possible configuration of the other parameters
+% at the end, if the evolution for a parameter is the same independently of
+% others parameter the boolean matrix is set to 1. (ex if the impact is
+% Same => the matrix is matrixSmaeBool)
+% the index of parameterMetric are saved in an other cell (matrixSame)
+% a line for the boolean matrix and the cell of index represent a parameter
+% a column represents a metric
 
-%%
-%Test for all parameter and all metrics
+%pay attention that the index in the matrix correspond to the index with a
+% different sorting of parameterMetric (for each parameter). Therefore the code parameterMetric(matrixSame{1,1}) does not print the right data
+% the function paramPrint prints the correct data according to the matrix placed in parameter
 
-% matrixSameBool = false(nbParam,4); 
-% matrixSame = cell(nbParam,4);
-% matrixDiffBool = false(nbParam,4); 
-% matrixDiff = cell(nbParam,4);
-% 
-% orderSave = nbParam:-1:1;
-% A = [zeros(nbParam-1,1) eye(nbParam-1);ones zeros(1,nbParam-1)];
-% for param = 1:8
-%     order = orderSave*A^(param-1);
-% %     fprintf('last element of order : %d \n',order(8));
-%     for metric = 9:13
-%         ParameterMetrics = sortrows(ParameterMetrics, order);
-%         nbTimesSameValue = size(find(ParameterMetrics(:,param)==ParameterMetrics(1,param)),1);
-%         %compute the number of possible value for the parameter
-%         a = 1:(4320/nbTimesSameValue);
-% 
-%         parameterImpact = 2*ones(size(ParameterMetrics,1),1);
-% 
-%         for idx = 1:nbTimesSameValue
-%             parameterImpact(a,1) = all(ParameterMetrics(a,metric)==ParameterMetrics(a(1),metric));
-%             a = a+size(a,2)*ones(size(a));
-%         end
-%         same = find(parameterImpact(:,1) == 1);
-%         matrixSameBool(param,(metric-8)) = (size(same,1) == 4320);
-%         matrixSame{param,(metric-8)} = same;
-%         
-%         diff = find(parameterImpact(:,1) == 0);
-%         matrixDiffBool(param,(metric-8)) = (size(diff,1) == 4320);
-%         matrixDiff{param,(metric-8)} = diff;
-%     
-%      end
-% end
-% ParameterMetrics = sortrows(ParameterMetrics, orderSave);
-% 
-% %%
-% %Test to check how a parameter influence a metric : always increase, always
-% %decrease, not a constant variation
-% 
-% matrixCroissBool = false(nbParam,5); 
-% matrixCroiss = cell(nbParam,5);
-% matrixDecroissBool = false(nbParam,5); 
-% matrixDecroiss = cell(nbParam,5);
-% matrixInconsistentBool = false(nbParam,5); 
-% matrixInconsistent = cell(nbParam,5);
-% 
-% 
-% orderSave = nbParam:-1:1;
-% A = [zeros(nbParam-1,1) eye(nbParam-1);ones zeros(1,nbParam-1)];
-% for param = 1:8
-%     order = orderSave*A^(param-1);
-% %     fprintf('last element of order : %d \n',order(8));
-%     ParameterMetrics = sortrows(ParameterMetrics, order);
-%       %compute the number of times the first value occurs the parameter
-%       %(allow to determine the number of possible value for the parameter)
-%     nbTimesSameValue = size(find(ParameterMetrics(:,param)==ParameterMetrics(1,param)),1);
-%     for metric = 9:13
-%         nbValuesToCheck = size(matrixDiff{param,(metric-8)},1);
-%         if(nbValuesToCheck ~= 0)
-%            
-%             a = 1:(4320/nbTimesSameValue);
-% 
-%             parameterImpact = 2*zeros(nbValuesToCheck,1);
-%             it = size(matrixDiff{param, metric-8},1)/a(end);
-%             
-%             for idx = 1:it
-%                 AllSup = all(ParameterMetrics(matrixDiff{param, metric-8}(a(2:end)),metric) > ParameterMetrics(matrixDiff{param, metric-8}(a(1:end-1)),metric));
-%                 AllInf = all(ParameterMetrics(matrixDiff{param, metric-8}(a(2:end)),metric) < ParameterMetrics(matrixDiff{param, metric-8}(a(1:end-1)),metric));
-%                 if AllSup == 1
-%                   parameterImpact(a,1) = 1;
-%                 elseif AllInf == 1
-%                     parameterImpact(a,1) = -1;
-%                 end
-%                 a = a+size(a,2)*ones(size(a));
-%             end
-%             croissant = find(parameterImpact(:,1) == 1);
-%             matrixCroissBool(param,(metric-8)) = (size(croissant,1) == 4320);
-%             matrixCroiss{param,(metric-8)} = croissant;
-% 
-%             inconsistent = find(parameterImpact(:,1) == 0);
-%             matrixInconsistentBool(param,(metric-8)) = (size(inconsistent,1) == 4320);
-%             matrixInconsistent{param,(metric-8)} = inconsistent;
-%             
-%             decroissant = find(parameterImpact(:,1) == -1);
-%             matrixDecroissBool(param,(metric-8)) = (size(decroissant,1) == 4320);
-%             matrixDecroiss{param,(metric-8)} = decroissant;
-%                         
-%         end
-%      end
-% end
-% ParameterMetrics = sortrows(ParameterMetrics, orderSave);
 
-%%
-matrixSameBool = false(nbParam,4); 
-matrixSame = cell(nbParam,4);
-matrixDiffBool = false(nbParam,4); 
-matrixDiff = cell(nbParam,4);
+matrixSameBool = false(nbParam,5); 
+matrixSame = cell(nbParam,5);
+matrixDiffBool = false(nbParam,5); 
+matrixDiff = cell(nbParam,5);
 matrixCroissBool = false(nbParam,5); 
 matrixCroiss = cell(nbParam,5);
 matrixDecroissBool = false(nbParam,5); 
@@ -171,7 +33,7 @@ matrixLabelSameDiff = cell(nbParam,5);
 
 orderSave = nbParam:-1:1;
 A = [zeros(nbParam-1,1) eye(nbParam-1);ones zeros(1,nbParam-1)];
-tic;
+
 for param = 1:8
     order = orderSave*A^(param-1);
 %     fprintf('last element of order : %d \n',order(8));
@@ -187,7 +49,6 @@ for param = 1:8
         matrixLabelSameDiff{param,(metric-8)} = zeros(4320,1);
         
         parameterImpact = 2*ones(size(ParameterMetrics,1),1);
-        parameterImpactDiff = 2*ones(nbValuesToCheck,1);
 
         for idx = 1:nbTimesSameValue
             parameterImpact(a,1) = all(ParameterMetrics(a,metric)==ParameterMetrics(a(1),metric));
@@ -195,33 +56,32 @@ for param = 1:8
             AllInf = all(ParameterMetrics(a(2:end),metric)<ParameterMetrics(a(1:end-1),metric));
             if parameterImpact(a(1),1) == 0
                 if AllSup == 1
-                  parameterImpactDiff(a,1) = 1;
+                  parameterImpact(a,1) = 2;
                 elseif AllInf == 1
-                    parameterImpactDiff(a,1) = -1;
+                    parameterImpact(a,1) = -2;
                 else
-                    parameterImpactDiff(a,1) = 0;
+                    parameterImpact(a,1) = -1;
                 end
             end
             a = a+size(a,2)*ones(size(a));
         end
+        %get index 
         same = find(parameterImpact(:,1) == 1);
+        % if the size of the index is 4320 the impact is independant of
+        % other parameter
         matrixSameBool(param,(metric-8)) = (size(same,1) == 4320);
+        % save the index in the cell
         matrixSame{param,(metric-8)} = same;
-        
-        diff = find(parameterImpact(:,1) == 0);
-        matrixDiffBool(param,(metric-8)) = (size(diff,1) == 4320);
-        matrixDiff{param,(metric-8)} = diff;
-        matrixLabelSameDiff{param,(metric-8)}(diff) = -1;
 
-        croissant = find(parameterImpactDiff(:,1) == 1);
+        croissant = find(parameterImpact(:,1) == 2);
         matrixCroissBool(param,(metric-8)) = (size(croissant,1)== 4320);
         matrixCroiss{param,(metric-8)} = croissant;
 
-        inconsistent = find(parameterImpactDiff(:,1) == 0);
+        inconsistent = find(parameterImpact(:,1) == -1);
         matrixInconsistentBool(param,(metric-8)) = (size(inconsistent,1) == 4320);
         matrixInconsistent{param,(metric-8)} = inconsistent;
 
-        decroissant = find(parameterImpactDiff(:,1) == -1);
+        decroissant = find(parameterImpact(:,1) == -2);
         matrixDecroissBool(param,(metric-8)) = (size(decroissant,1) == 4320);
         matrixDecroiss{param,(metric-8)} = decroissant;
 
@@ -232,12 +92,8 @@ for param = 1:8
         
      end
 end
-toc
+
 ParameterMetrics = sortrows(ParameterMetrics, orderSave);
-
-
-
-
 
 M = 2*ones(nbParam,5);
 M(matrixCroissBool==1)=1;
@@ -246,25 +102,10 @@ M(matrixSameBool==1)=0;
 %M(matrixInconsistentBool==1)=2;
 
 %%
-% -1 the metric change if the value of the parameter change for the given
-% configuration(when others parameters are fixed)
-% 0  the metric doesn't change if the value of the paramater change
-matrixLabelSameDiff = cell(nbParam,5);
-
-for param = 1:8
-    for metric = 9:13 
-        matrixLabelSameDiff{param,(metric-8)} = zeros(4320,1);
-        nbValuesToCheck = size(matrixDiff{param,(metric-8)},1);
-        if(nbValuesToCheck ~= 0)
-            
-            matrixLabelSameDiff{param,(metric-8)}(matrixDiff{param,(metric-8)}) = -1;
-            
-        end
-     end
-end
-
 
 % Labelisation 
+% summarizing the label in one cell instead of 4
+
 % -1 the metric decrease if you change the parameter and fix others
 % 0  the metric doesn't change if the value of the paramater change
 % 1  the metric increase if you change the parameter and fix others

@@ -35,12 +35,3 @@ ParameterMetrics = sortrows(ParameterMetrics, orderSave);
 
 
 
-
-
-
-
-%%
-% utilisation des moindres carré (si j'y arrive)
-
-
-

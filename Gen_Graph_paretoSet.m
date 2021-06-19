@@ -1,9 +1,3 @@
-% sln = [Energy./DurationII , Latency, DurationII, Memory];
-% a=paretoSet_func(sln);
-% indPar = find(a == 1);
-% 
-% paretoTest = [Energy1./DurationII1, Latency1, DurationII1, Memory1];
-
 %%
 %graph3d avec seulement les pareto sets pour les 3 latences différentes
 %il faut éditer les ticks et les tickes labels car beaucoups se superposent

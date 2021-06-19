@@ -48,7 +48,7 @@ for param = 1:8
         matrixLabelSameDiffLess{param,(metric-8)} = zeros(4320,1);
         
         parameterImpact = 2*ones(size(ParameterMetrics,1),1);
-        parameterImpactDiff = 2*ones(nbValuesToCheck,1);
+        parameterImpactDiff = 2*ones(size(ParameterMetrics,1),1);
 
         for idx = 1:nbTimesSameValue
             aShort = a(aSelect);
