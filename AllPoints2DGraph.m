@@ -1,4 +1,13 @@
-%All points tested
+%All points tested for all latency and memory in 2D (lot of pictures)
+%for each value of the latency, iterate through the posible value of the
+%memory and generate a figure with all the points tested in blue
+% axis : 
+%   X : Power
+%   Y : DurationII
+%   color map : Memory
+%   Latency fixed 
+
+
 lat = unique(Latency);
 for l = 1:size(lat)
     indice = 1;

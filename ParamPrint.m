@@ -5,7 +5,7 @@ function [ ParamFilter ] = ParamPrint(ParameterMetrics, matrix, param, metric )
 % ParameterMetrics : tableau de données
 % matrix : Cell qui contient l'ensemble des indices que l'on veut extraire de ParameterMetrics
 % param : paramètre que l'on sélection pour le trie(pour
-% metric : coix 
+% metric : choix de la metrique que l'on affiché
 if param > 8 || param < 0 || metric > 5 || metric < 0
     error('index out of bound') ;
 end

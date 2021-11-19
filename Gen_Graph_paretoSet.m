@@ -1,5 +1,12 @@
+% Import Data with the script GenVariable before generating figure
+GenVariables
+
 %%
 %graph3d avec seulement les pareto sets pour les 3 latences différentes
+% axis : 
+%   X : Power
+%   Y : DurationII
+%   Z + colormap : memory
 %il faut éditer les ticks et les tickes labels car beaucoups se superposent
 lat = unique(paretoTest(:,2));
 
@@ -18,9 +25,12 @@ end
 
 %%
 % orthogonal projection of 3d plots in the plane of power and durationII
-% set(gca, 'ColorOrder', ColorOdrDef);
-% Marker = ['x';'o';'*';'s';'d'];
-% MarkerSelect = Marker(1,1);
+% print all pareto points for all latency in separated figure and the
+% axis representing the memory is display with a color map.
+% axis : 
+%   X : Power
+%   Y : DurationII
+%   color map : memory
 
 lat = unique(paretoTest(:,2));
 for l = 1:size(lat)
@@ -32,11 +42,6 @@ for l = 1:size(lat)
     cMap = parula(size(mem,1));
     for m = 1:size(mem)
         c = find(and(paretoTest(:,2)==lat(l), paretoTest(:,4)==mem(m)));
-%         if ceil(indice/(size(get(gca,'ColorOrder'),1)))< size(Marker,1)
-%             MarkerSelect = Marker(ceil(indice/(size(get(gca,'ColorOrder'),1))),1);
-%         else 
-%             MarkerSelect = '+';
-%         end
         MarkerColor = cMap(m,:);
         plot(paretoTest(c,1),paretoTest(c,3),'*','MarkerEdgeColor',MarkerColor),hold on;
         LegendBuilder{indice,1} = ['latency : ',int2str(lat(l)),', memory : ', int2str(mem(m))];
@@ -56,61 +61,44 @@ end
 
 clearvars fig;
 
-%%
-%latency = 1 special colors plus trop utiles car y'a les colors map
-%maintenant
-indice = 1;
-l=1;
-LegendBuilder={};
-fig = figure(),
-set(gca, 'ColorOrder', ColorOdrDef4, 'NextPlot', 'replacechildren');
 
-LatRed = find(paretoTest(:,2)==lat(l));
-mem = unique(paretoTest(LatRed,4));
-cMap = parula(size(mem,1));
-
-for m = 1:size(mem,1)
-    c = find(and(paretoTest(:,2)==lat(l), paretoTest(:,4)==mem(m)));
-%     if ceil(indice/(size(get(gca,'ColorOrder'),1)))< size(Marker,1)
-%         MarkerSelect = Marker(ceil(indice/(size(get(gca,'ColorOrder'),1))),1);
-%     else 
-%         MarkerSelect = '+';
-%     end
-    MarkerColor = cMap(m,:);
-    plot(paretoTest(c,1),paretoTest(c,3),'*','MarkerEdgeColor',MarkerColor),hold on;
-    LegendBuilder{indice,1} = ['latency : ',int2str(lat(l)),', memory : ', int2str(mem(m))];
-    indice = indice + 1;
-    
-end
-colormap(fig, cMap);
-cBar = colorbar;
-cBar.Ticks = 1/(2*size(mem,1)):1/(size(mem,1)):1;
-cBar.TickLabels = mem;
-cBar.Label.String = 'Memory';
-% cBar.Limits = [min(mem), max(mem)];
-% 
-
-xlabel('Power');
-ylabel('DurationII');
-title(['DurationII plotted against Power for the latency of ',int2str(lat(l))]);
-leg = legend(LegendBuilder);
-leg.Visible ='off';
 %%
 %print all points and pareto Set for a given Memory and latency
-latencySelected = 1;
-memorySelected = 14400;
-e = find(and(Latency == latencySelected, Memory== memorySelected));
-e1 = find(and(paretoTest(:,2) == latencySelected, paretoTest(:,4) == memorySelected));
-E1 = sortrows(paretoTest(e1,:),1);
-figure(),plot(Power(e),DurationII(e),'bx'), hold on;
-plot(E1(:,1),E1(:,3),'-rx');
+% axis : 
+%   X : Power
+%   Y : DurationII
+%   Latency and Memory selected by the user 
+%   Latency = latencySelected
+%   Memory = memorySelected
+latencySelected = 2;
+memorySelected = 5875296;
 
-xlabel('power'),
-ylabel('DurationII'),
-legend(['all point tested'],['pareto set']);
-title(['Latency = ', int2str(latencySelected), ' ; Memory = ', int2str(memorySelected)]);
+e = find(and(Latency == latencySelected, Memory== memorySelected));
+if (isempty(e))
+    print("error : no output with this memory consumption and/or latency")
+    
+else
+    
+    e1 = find(and(paretoTest(:,2) == latencySelected, paretoTest(:,4) == memorySelected));
+    E1 = sortrows(paretoTest(e1,:),1);
+    figure(),plot(Power(e),DurationII(e),'bx'), hold on;
+    plot(E1(:,1),E1(:,3),'-rx');
+
+    xlabel('power'),
+    ylabel('DurationII'),
+    legend(['all point tested'],['pareto set']);
+    title(['Latency = ', int2str(latencySelected), ' ; Memory = ', int2str(memorySelected)]);
+end
+
 %%
 %All points tested + pareto set for all latency and memory in 2D (lot of pictures)
+%for each value of the latency, iterate through the posible value of the
+%memory and generate a figure with all the points tested in blue and the
+%pareto points in red
+% axis : 
+%   X : Power
+%   Y : DurationII
+%   Latency and Memory fixed 
 Path = 'Graph_Metric/AllptsAndParetoSet/';
 PathImg = [Path, 'pngSave/'];
 lat = unique(paretoTest(:,2));
@@ -138,7 +126,14 @@ end
 clearvars fig;
 %%
 %pareto Set for all latency and memory in 2D (lot of pictures)
-
+%   Same as before except only pareto points(blue) are printed
+%for each value of the latency, iterate through the posible value of the
+%memory and generate a figure with all the points tested in blue and the
+%pareto points in red
+% axis : 
+%   X : Power
+%   Y : DurationII
+%   Latency and Memory fixed 
 lat = unique(paretoTest(:,2));
 for l = 1:size(lat)
     LatRed = find(paretoTest(:,2)==lat(l));
